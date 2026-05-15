@@ -1,0 +1,26 @@
+# Claude Code 本地配置
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Office 临时锁文件
+~$*.pptx
+~$*.docx
+~$*.xlsx
+
+# 操作系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
