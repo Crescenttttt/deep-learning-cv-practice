@@ -24,3 +24,6 @@ desktop.ini
 .idea/
 .vscode/
 *.swp
+
+# 论文 PDF 文本提取中间产物
+papers/_*.txt
