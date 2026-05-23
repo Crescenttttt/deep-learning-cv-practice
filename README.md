@@ -15,7 +15,7 @@
 
 | 路径 | 内容 |
 |------|------|
-| `docs/` | 项目文档（完成路径与学习指南等） |
+| `docs/` | 项目文档：完成路径与学习指南、4 篇文献总结（综述导读 + 单篇） |
 | `papers/` | 文献库：4 篇 2023+ 目标检测代表论文（PDF + 选篇说明） |
 | `presentation/` | 开题报告 PPT、口播稿、PPT 生成脚本 |
 | `CLAUDE.md` | 项目背景与协作说明 |
@@ -24,12 +24,14 @@
 
 ## 文献库（papers/）
 
-| 篇 | 论文 | 路线 | 发表 |
-|----|------|------|------|
-| 01 | YOLOv9 — Programmable Gradient Information | CNN · 单阶段 | ECCV 2024 |
-| 02 | YOLOv10 — Real-Time End-to-End Detection | CNN · 端到端 | NeurIPS 2024 |
-| 03 | RT-DETR — DETRs Beat YOLOs | Transformer · 实时 | CVPR 2024 |
-| 04 | YOLO-World — Open-Vocabulary Detection | 多模态 · 开放词汇 | CVPR 2024 |
+| 篇 | 论文 | 路线 | 发表 | 文献总结 |
+|----|------|------|------|----------|
+| 01 | YOLOv9 — Programmable Gradient Information | CNN · 单阶段 | ECCV 2024 | [01](docs/文献总结-01-YOLOv9.md) |
+| 02 | YOLOv10 — Real-Time End-to-End Detection | CNN · 端到端 | NeurIPS 2024 | [02 深度分析](docs/文献总结-02-YOLOv10（深度分析）.md) |
+| 03 | RT-DETR — DETRs Beat YOLOs | Transformer · 实时 | CVPR 2024 | [03](docs/文献总结-03-RT-DETR.md) |
+| 04 | YOLO-World — Open-Vocabulary Detection | 多模态 · 开放词汇 | CVPR 2024 | [04](docs/文献总结-04-YOLO-World.md) |
+
+四篇的横向对比与选篇逻辑见 [`docs/文献总结-00-综述导读.md`](docs/文献总结-00-综述导读.md)。
 
 ## 进度
 
