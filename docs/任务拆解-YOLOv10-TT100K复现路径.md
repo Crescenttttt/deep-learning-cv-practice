@@ -88,12 +88,12 @@
 
 ### 2.1 环境搭建（B 主责）
 
-- [ ] **2.1.1** Clone 官方仓库 `git clone https://github.com/THU-MIG/yolov10`
-- [ ] **2.1.2** **严格按官方 README** 创建 conda 环境（Python 3.9 / PyTorch 2.0.1 / CUDA 11.8 或仓库当时锁定的版本）
-- [ ] **2.1.3** 验证：`yolo predict model=yolov10n.pt source=path/to/bus.jpg` 能跑通推理并出图
-- [ ] **2.1.4** 把环境步骤写成 `docs/环境搭建.md`（含遇到的坑），其他成员照着复现
+- [x] **2.1.1** Clone 官方仓库 `git clone https://github.com/THU-MIG/yolov10`（克隆到 `D:\Project\yolov10`）
+- [x] **2.1.2** 创建 conda 环境（Python 3.9 / PyTorch 2.0.1+cu118 / RTX 4070 12GB），用 conda-forge 源
+- [x] **2.1.3** 验证：`yolov10n` 对 `bus.jpg` 推理通过，检出 4 persons + 1 bus，GPU ~68ms/图
+- [x] **2.1.4** 已写成 `docs/环境搭建.md`（含 5 个踩坑记录）
 
-**验证**：至少 2 名成员（B + 另 1 人）独立按文档跑通推理。
+**验证**：至少 2 名成员（B + 另 1 人）独立按文档跑通推理。 → ⏳ 首搭机（B）已通过，待第 2 人复现。
 
 ### 2.2 TT100K 数据准备（C 主责）
 
