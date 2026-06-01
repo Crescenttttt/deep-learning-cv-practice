@@ -1,6 +1,11 @@
 # Claude Code 本地配置
 .claude/
 
+# 数据集与训练产物（体积大，用云盘/学校盘共享，仓库只放脚本与路径说明）
+datasets/
+runs/
+*.pt
+
 # Python
 __pycache__/
 *.py[cod]

@@ -99,11 +99,19 @@
 
 - [ ] **2.2.1** 下载 TT100K 原始数据（约 ~10GB+）
 - [ ] **2.2.2** 解压、整理目录、检查图片可读
-- [ ] **2.2.3** **类别过滤**：按 1.1.3 的 45 类子集筛选标注（写一个 Python 脚本 `scripts/filter_tt100k.py`）
-- [ ] **2.2.4** **格式转换**：TT100K JSON → YOLO `.txt`（每行 `class_id cx cy w h`，归一化到 [0,1]），写 `scripts/tt100k_to_yolo.py`
-- [ ] **2.2.5** **数据划分**：按 7/1.5/1.5 切 train/val/test，生成 `train.txt` / `val.txt` / `test.txt`（每行一个图像路径）
-- [ ] **2.2.6** 生成 Ultralytics 风格的 `tt100k.yaml`（`path`、`train`、`val`、`test`、`names`）
+- [x] **2.2.3** **类别过滤**：`scripts/filter_tt100k.py` 已写——从标注统计各类实例数，按 `--min-count`（默认 100）筛选，输出 `tt100k_classes.txt` + 全类别 `counts.csv`（供 1.1.2 直方图），并与论文标准 45 类交叉核对。已用合成数据冒烟测试通过。
+- [x] **2.2.4** **格式转换**：`scripts/tt100k_to_yolo.py` 已写——TT100K JSON → YOLO `.txt`（`class_id cx cy w h`，按各图实际尺寸归一化）。已验证非正方形图 W/H 分别归一化正确。
+- [x] **2.2.5** **数据划分**：同上脚本完成——沿用官方 train/test（按 path 前缀），再从 train 切出 val（`--val-ratio` 默认 0.1）；采用 `images/{train,val,test}` + `labels/{...}` 标准目录结构（非 list 文件，等价且更通用），图像默认硬链接零拷贝。
+- [x] **2.2.6** 生成 Ultralytics 风格 `tt100k.yaml`（`path` / `train` / `val` / `test` / `names`）——同上脚本自动产出，已验证。
 - [ ] **2.2.7** 抽样可视化：随机 20 张训练图叠加 bbox，肉眼验证标注无误
+
+> **脚本状态**：2.2.3-2.2.6 脚本已交付并通过合成数据冒烟测试；**待 2.2.1/2.2.2 下载解压真实数据后，按下方命令实跑一遍**并完成 2.2.7 可视化与下方"加载验证"。
+>
+> ```powershell
+> conda activate yolov10
+> python scripts/filter_tt100k.py --ann <TT100K根>/annotations.json
+> python scripts/tt100k_to_yolo.py --data-root <TT100K根>
+> ```
 
 **验证**：官方代码用 `tt100k.yaml` 能成功**加载数据**并跑 1 个 epoch 不报错（不必收敛）。
 
