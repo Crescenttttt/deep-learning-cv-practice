@@ -97,33 +97,40 @@
 
 ### 2.2 TT100K 数据准备（C 主责）
 
-- [ ] **2.2.1** 下载 TT100K 原始数据（约 ~10GB+）
-- [ ] **2.2.2** 解压、整理目录、检查图片可读
+- [x] **2.2.1** 下载 TT100K 原始数据（2016 版，已放 `D:\Project\data`）
+- [x] **2.2.2** 解压、整理目录、检查图片可读（含 `train/ test/ other/`，`annotations.json` 16811 图）
 - [x] **2.2.3** **类别过滤**：`scripts/filter_tt100k.py` 已写——从标注统计各类实例数，按 `--min-count`（默认 100）筛选，输出 `tt100k_classes.txt` + 全类别 `counts.csv`（供 1.1.2 直方图），并与论文标准 45 类交叉核对。已用合成数据冒烟测试通过。
 - [x] **2.2.4** **格式转换**：`scripts/tt100k_to_yolo.py` 已写——TT100K JSON → YOLO `.txt`（`class_id cx cy w h`，按各图实际尺寸归一化）。已验证非正方形图 W/H 分别归一化正确。
 - [x] **2.2.5** **数据划分**：同上脚本完成——沿用官方 train/test（按 path 前缀），再从 train 切出 val（`--val-ratio` 默认 0.1）；采用 `images/{train,val,test}` + `labels/{...}` 标准目录结构（非 list 文件，等价且更通用），图像默认硬链接零拷贝。
 - [x] **2.2.6** 生成 Ultralytics 风格 `tt100k.yaml`（`path` / `train` / `val` / `test` / `names`）——同上脚本自动产出，已验证。
 - [ ] **2.2.7** 抽样可视化：随机 20 张训练图叠加 bbox，肉眼验证标注无误
 
-> **脚本状态**：2.2.3-2.2.6 脚本已交付并通过合成数据冒烟测试；**待 2.2.1/2.2.2 下载解压真实数据后，按下方命令实跑一遍**并完成 2.2.7 可视化与下方"加载验证"。
+> **脚本状态**：2.2.3-2.2.6 已在**真实 TT100K（2016 版）实跑通过**：
+> - 统计：16811 图 / 182 类 / 26349 实例 → 阈值 100 筛出 **45 类**（保留 90.8% 实例），**与论文标准 45 类完全一致**；
+> - 转换/划分：**train/val/test = 5493 / 610 / 3067**，0 缺失 0 丢弃，硬链接零拷贝；
+> - 加载校验：`check_det_dataset('datasets/tt100k/tt100k.yaml')` 通过（45 names）；并跑通 1-epoch 训练（见 2.3）。
+> - 产物：`scripts/tt100k_classes.txt`（45 类，定义 class_id 顺序）、`scripts/tt100k_class_counts.csv`（全类计数，供 1.1.2 直方图）、`datasets/tt100k/`（已 gitignore）。
 >
+> 复现命令：
 > ```powershell
 > conda activate yolov10
-> python scripts/filter_tt100k.py --ann <TT100K根>/annotations.json
-> python scripts/tt100k_to_yolo.py --data-root <TT100K根>
+> python scripts/filter_tt100k.py --ann D:\Project\data\annotations.json
+> python scripts/tt100k_to_yolo.py --data-root D:\Project\data
 > ```
 
-**验证**：官方代码用 `tt100k.yaml` 能成功**加载数据**并跑 1 个 epoch 不报错（不必收敛）。
+**验证**：✅ 已通过 `check_det_dataset` 加载校验 + 1-epoch 训练不报错。
 
 ### 2.3 训练 / 评测脚本设计（B 主责，A 协助理解超参）
 
-- [ ] **2.3.1** 编写 `scripts/train.py`：封装 `model.train(data='tt100k.yaml', epochs=..., imgsz=..., batch=..., ...)`
-- [ ] **2.3.2** 编写 `scripts/eval.py`：在 test 集上计算 mAP@0.5、mAP@0.5:0.95、各类 AP
-- [ ] **2.3.3** 编写 `scripts/predict_demo.py`：批量推理 + 画框出图，用于报告插图
-- [ ] **2.3.4** 设计**实验配置表**：列出待跑的若干组实验（baseline / 不同 imgsz / 不同 lr / 数据增广开关 / 对比 YOLOv8-S 等）
-- [ ] **2.3.5** 设计日志规范：每次训练输出到 `runs/<exp_name>/`，并在 `experiments.md` 登记
+- [x] **2.3.1** `scripts/train.py`：封装 `model.train()`，支持本地权重/HF id/简写，暴露 epochs/imgsz/batch/lr0/close-mosaic；输出固定到 `runs/detect/<name>`。
+- [x] **2.3.2** `scripts/eval.py`：在指定 split 算 mAP@0.5、mAP@0.5:0.95、mP/mR + 每类 AP（升序列出便于定位弱类）。
+- [x] **2.3.3** `scripts/predict_demo.py`：test 集随机抽 N 张或指定 source 推理画框出图。
+- [x] **2.3.4** 实验配置表 `experiments.md`：baseline / lr / imgsz / 增广 / YOLOv8-S 对比 / -N 共 7 组计划 + 命令速查。
+- [x] **2.3.5** 日志规范：训练统一输出 `runs/detect/<name>/`，name 与 `experiments.md` 行对齐。
 
-**验证**：能在 train 集上跑 5 epoch 短训，eval 脚本输出指标，predict_demo 出图。
+> 三脚本已 Python 3.9 编译 + `--help` 验证；并用 **1-epoch 真实训练打通 train→val→存 best.pt 全链路**（YOLOv10s/45类/AdamW；1 epoch 指标≈0 属正常）。修正了输出落到 ultralytics 全局目录的问题（现固定写仓库 `runs/detect/`）。
+
+**验证**：✅ 1-epoch 短训跑通；正式 5+ epoch 训练见阶段 3.1。
 
 ### 2.4 系统设计文档（C 主责）
 
@@ -140,10 +147,10 @@
 
 ### 3.1 基础训练（B 主责）
 
-- [ ] **3.1.1** 主实验：YOLOv10-S，加载官方 COCO 预训练，imgsz=640，batch 视显存调（建议 16/32），epochs ≥ 100（按收敛情况）
-- [ ] **3.1.2** 监控训练：loss 曲线、mAP@0.5 / mAP@0.5:0.95 曲线、学习率曲线
-- [ ] **3.1.3** 在 val 集上 early stop / 选最优 ckpt；最终在 **test 集**上报告指标
-- [ ] **3.1.4** 验收：达到 1.3.3 设定的及格线，**没达到则进入调参**
+- [x] **3.1.1** 主实验已跑：YOLOv10-S + COCO 预训练，imgsz=640，batch=16，100 轮 → `runs/detect/s_base_640/`
+- [x] **3.1.2** 监控：loss/mAP/lr 曲线已出（`results.png`、`confusion_matrix.png`、`PR_curve.png` 等）
+- [x] **3.1.3** test 集报告：**mAP@0.5=0.415，mAP@0.5:0.95=0.302**，mP 0.427 / mR 0.445，4.2ms/图（见 `experiments.md`）
+- [x] **3.1.4** 验收：**未达及格线 0.70 → 进入调参**（小目标瓶颈，下一步 imgsz=1280，见 3.2）
 
 ### 3.2 调参实验（B 主责，A 提供理论判断）
 

@@ -47,9 +47,9 @@ CUIT「基于深度学习的计算机视觉实践项目」课程作业，2026 �
 
 工作目录 `D:\Project\deep-learning-cv-practice`（Git 仓库已建立，main 分支）。
 
-**已完成**：仓库与根 README 就位；4 篇目标检测文献总结与综述导读已入库（`a39bf0d`）；选题已定（YOLOv10 + TT100K）；**TT100K 数据准备脚本已交付**（`scripts/filter_tt100k.py` 类别统计/筛选、`scripts/tt100k_to_yolo.py` JSON→YOLO 转换+划分+生成 yaml，已通过合成数据冒烟测试，对应任务 2.2.3-2.2.6；`.gitignore` 已屏蔽 `datasets/`、`runs/`、`*.pt`）。
+**已完成**：仓库与根 README + 4 篇文献总结（`a39bf0d`）；选题已定（YOLOv10 + TT100K）；**环境搭通**（conda `yolov10`，Py3.9 + PyTorch2.0.1+cu118，RTX4070；官方仓库 `D:\Project\yolov10`；`docs/环境搭建.md`，任务 2.1）；**TT100K 数据准备完成**（`scripts/filter_tt100k.py`+`tt100k_to_yolo.py`，真实 2016 版实跑：182→45 类与论文一致，train/val/test=5493/610/3067，`check_det_dataset` 通过；`docs/数据下载与目录说明.md`，任务 2.2）；**训练/评测脚本交付**（`scripts/train.py`/`eval.py`/`predict_demo.py`+`experiments.md`，任务 2.3）；**YOLOv10-S baseline 已跑**（640/100轮，test **mAP@0.5=0.415**、mAP@0.5:0.95=0.302，4.2ms/图，任务 3.1）。原始数据在仓库外 `D:\Project\data`。
 
-**下一步**：下载解压真实 TT100K（任务 2.2.1/2.2.2）后实跑上述脚本并完成抽样可视化（2.2.7）；核对 4 篇文献全部 2023+ 且锁定 YOLOv10 原论文做深度分析；完成第 12 周开题 PPT。
+**下一步**：baseline 未达 0.70 → 调参（首选 **imgsz=1280** 攻小目标，任务 3.2）；横向对比 YOLOv8-S（3.3）、NMS-free 消融（3.4）；抽样可视化（2.2.7）；推进需求分析报告等文档（期末占比最大）。
 
 ## 给 Claude 的协作提示
 
