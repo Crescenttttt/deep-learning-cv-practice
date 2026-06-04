@@ -49,6 +49,7 @@ def main() -> int:
     p.add_argument("--lr0", type=float, default=0.01, help="初始学习率（调参实验 3.2.1）")
     p.add_argument("--close-mosaic", type=int, default=10, help="最后 N 轮关闭 mosaic（论文常见做法，3.2.3）")
     p.add_argument("--device", default="0", help="GPU 编号，或 'cpu'")
+    p.add_argument("--workers", type=int, default=8, help="DataLoader worker 数（Windows 高分辨率易崩，调小如 4/2）")
     p.add_argument("--resume", action="store_true", help="从上次中断处续训")
     args = p.parse_args()
 
@@ -61,6 +62,7 @@ def main() -> int:
         lr0=args.lr0,
         close_mosaic=args.close_mosaic,
         device=args.device,
+        workers=args.workers,
         project="runs/detect",  # 固定输出到本仓库内（否则会落到 ultralytics 全局 runs_dir）
         name=args.name,
         resume=args.resume,
