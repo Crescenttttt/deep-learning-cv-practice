@@ -47,6 +47,9 @@ def main() -> int:
     p.add_argument("--imgsz", type=int, default=640)
     p.add_argument("--batch", type=int, default=16)
     p.add_argument("--lr0", type=float, default=0.01, help="初始学习率（调参实验 3.2.1）")
+    p.add_argument("--optimizer", default="auto",
+                   help="优化器：auto/SGD/AdamW（auto 会用 AdamW 并覆盖 lr0≈2e-4，"
+                        "要让 --lr0 生效需显式指定 SGD，见 experiments.md baseline 发现）")
     p.add_argument("--close-mosaic", type=int, default=10, help="最后 N 轮关闭 mosaic（论文常见做法，3.2.3）")
     p.add_argument("--device", default="0", help="GPU 编号，或 'cpu'")
     p.add_argument("--workers", type=int, default=8, help="DataLoader worker 数（Windows 高分辨率易崩，调小如 4/2）")
@@ -60,6 +63,7 @@ def main() -> int:
         imgsz=args.imgsz,
         batch=args.batch,
         lr0=args.lr0,
+        optimizer=args.optimizer,
         close_mosaic=args.close_mosaic,
         device=args.device,
         workers=args.workers,

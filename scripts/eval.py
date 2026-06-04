@@ -15,6 +15,18 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 
+def load_for_eval(weights: str):
+    """按权重头类型选类：YOLOv10 权重用 YOLOv10（one2one 无 NMS 评测），
+    YOLOv8 等用通用 YOLO（标准 NMS 评测）。否则 YOLOv8 会被错误地走 v10 后处理。"""
+    import torch
+    from ultralytics import YOLO, YOLOv10
+
+    ckpt = torch.load(weights, map_location="cpu", weights_only=False)
+    model_obj = ckpt["model"] if isinstance(ckpt, dict) and "model" in ckpt else ckpt
+    head_name = type(model_obj.model[-1]).__name__ if hasattr(model_obj, "model") else ""
+    return YOLOv10(weights) if "v10" in head_name.lower() else YOLO(weights)
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description="YOLOv10 在 TT100K 上评测")
     p.add_argument("--weights", required=True, help="训练得到的权重，如 runs/detect/<name>/weights/best.pt")
@@ -24,9 +36,7 @@ def main() -> int:
     p.add_argument("--device", default="0")
     args = p.parse_args()
 
-    from ultralytics import YOLOv10
-
-    model = YOLOv10(args.weights)
+    model = load_for_eval(args.weights)
     metrics = model.val(data=args.data, split=args.split, imgsz=args.imgsz, device=args.device,
                         project="runs/detect", name=f"eval_{args.split}")
 
