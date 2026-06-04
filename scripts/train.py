@@ -30,7 +30,16 @@ def load_model(model: str):
     from ultralytics import YOLO, YOLOv10
 
     if Path(model).exists():            # 本地 .pt / .yaml
-        return YOLOv10(model) if "yolov10" in model.lower() else YOLO(model)
+        # 按检测头类型选类，而非看文件名：续训的 last.pt 路径不含 "yolov10"，
+        # 看文件名会被误判成 YOLOv8 导致续训失败。.yaml 走 except 回退到文件名。
+        try:
+            import torch
+            ckpt = torch.load(model, map_location="cpu", weights_only=False)
+            obj = ckpt["model"] if isinstance(ckpt, dict) and "model" in ckpt else ckpt
+            head = type(obj.model[-1]).__name__ if hasattr(obj, "model") else ""
+            return YOLOv10(model) if "v10" in head.lower() else YOLO(model)
+        except Exception:
+            return YOLOv10(model) if "yolov10" in model.lower() else YOLO(model)
     if model.startswith("yolov8"):      # YOLOv8 走通用 YOLO（对比实验用）
         return YOLO(model if model.endswith(".pt") else f"{model}.pt")
     if "/" in model:                    # 完整 HF id，如 jameslahm/yolov10s
