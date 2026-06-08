@@ -33,12 +33,13 @@ def main() -> int:
     p.add_argument("--data", default="datasets/tt100k/tt100k.yaml")
     p.add_argument("--split", default="test", choices=["train", "val", "test"], help="评测集（默认 test）")
     p.add_argument("--imgsz", type=int, default=640, help="须与训练时一致")
+    p.add_argument("--augment", action="store_true", help="TTA 测试时增强（多尺度+翻转推理，零重训提分）")
     p.add_argument("--device", default="0")
     args = p.parse_args()
 
     model = load_for_eval(args.weights)
     metrics = model.val(data=args.data, split=args.split, imgsz=args.imgsz, device=args.device,
-                        project="runs/detect", name=f"eval_{args.split}")
+                        augment=args.augment, project="runs/detect", name=f"eval_{args.split}")
 
     box = metrics.box
     print("\n========== 总体指标 ==========")
