@@ -103,7 +103,7 @@
 - [x] **2.2.4** **格式转换**：`scripts/tt100k_to_yolo.py` 已写——TT100K JSON → YOLO `.txt`（`class_id cx cy w h`，按各图实际尺寸归一化）。已验证非正方形图 W/H 分别归一化正确。
 - [x] **2.2.5** **数据划分**：同上脚本完成——沿用官方 train/test（按 path 前缀），再从 train 切出 val（`--val-ratio` 默认 0.1）；采用 `images/{train,val,test}` + `labels/{...}` 标准目录结构（非 list 文件，等价且更通用），图像默认硬链接零拷贝。
 - [x] **2.2.6** 生成 Ultralytics 风格 `tt100k.yaml`（`path` / `train` / `val` / `test` / `names`）——同上脚本自动产出，已验证。
-- [ ] **2.2.7** 抽样可视化：随机 20 张训练图叠加 bbox，肉眼验证标注无误
+- [x] **2.2.7** 抽样可视化：`scripts/draw_gt_samples.py` 随机 20 张训练图叠加 GT bbox（`runs/analysis/gt_samples/`），肉眼验证标注对齐无误（含 6 框龙门架限速牌图，验证多目标与小目标标注）
 
 > **脚本状态**：2.2.3-2.2.6 已在**真实 TT100K（2016 版）实跑通过**：
 > - 统计：16811 图 / 182 类 / 26349 实例 → 阈值 100 筛出 **45 类**（保留 90.8% 实例），**与论文标准 45 类完全一致**；
@@ -177,10 +177,10 @@
 
 ### 3.5 结果整理与可视化（C 主责）
 
-- [ ] **3.5.1** 训练曲线图（loss / mAP，导出 PNG）
-- [ ] **3.5.2** 测试集随机 10 张图的检测可视化（**含一张小目标 hard case**）
-- [ ] **3.5.3** 混淆矩阵 / PR 曲线 / 每类 AP 柱状图
-- [ ] **3.5.4** 失败案例分析：找 2–3 张漏检 / 误检图，文字分析原因（一般是小目标、稀有类、光照）
+- [x] **3.5.1** 训练曲线图：`scripts/plot_curves.py` 五实验 val mAP@0.5 收敛对比 → `docs/figures/training_curves.png`（直观呈现 auto 欠拟合 vs SGD、640 vs 1280）
+- [x] **3.5.2** 测试集随机 10 张检测可视化：`predict_demo.py --imgsz 1280`（seed=0）→ `docs/figures/predict_demo/`×10（2048²→1024 降采样）；小目标 hard case 见 `docs/figures/failure_cases/rank02`（收费站远景 8 个 pl20 漏检）
+- [x] **3.5.3** 混淆矩阵 / PR 曲线 / 每类 AP 柱状图：`scripts/plot_per_class_ap.py`（test@1280 复评 mAP@0.5=0.7709 与登记一致）→ `docs/figures/per_class_ap_s1280.{png,csv}` + `confusion_matrix_s1280.png` + `PR_curve_s1280.png`；最弱类 ph5/w32/w13/p6/ph4（均为小尺寸限高/警告牌）
+- [x] **3.5.4** 失败案例分析：`scripts/find_failure_cases.py` 全 test 集 FN=1382/FP=2370，top12 最差图 + summary.csv；三类失败模式（极小目标漏检 / 类标志物误检 / 兜底类与限速近似类混淆）+ 标注不完备注意点，详见 experiments.md「失败案例分析」，代表图 `docs/figures/failure_cases/`×3
 
 ### 3.6 文档撰写（C 主责）
 
