@@ -158,7 +158,7 @@
 
 - [x] **3.2.1** 优化器/学习率：`optimizer=auto`(AdamW lr≈2e-4) vs **显式 SGD lr=0.01** 已验证 → 640 下 test mAP@0.5 **0.415→0.646(+56%)**，定位 baseline 低分根因是欠拟合（`s_640_sgd`）
 - [x] **3.2.2** 输入分辨率：640 vs **1280** 已验证 → test mAP@0.5 **0.415→0.592（+43%）**，证实高分辨率对 TT100K 小目标显著有效（`s_imgsz1280`）
-- [ ] **3.2.3** 数据增广：默认 mosaic+mixup vs 关闭 mosaic 最后 10 epoch（论文常见做法）
+- [x] **3.2.3** 数据增广消融：默认 mosaic（末 10 轮关）vs **全程关 mosaic** 已验证 → 640+SGD 下 test mAP@0.5 **0.646 vs 0.629（mosaic 贡献 +0.017）**，证明 mosaic 对小目标数据正贡献（`s_nomosaic`，详见 experiments.md「增广消融」）
 - [x] **3.2.4** 每组实验填入 `experiments.md` 对比表（实验名 / 配置 / mAP / 备注）
 - [x] **最终主实验**：叠加 1280+SGD+150轮 → test **mAP@0.5=0.771 / mAP@.5:.95=0.601**，比 baseline +86%，mAP@.5:.95 基本追平 v8（0.610）（`s_1280_sgd_e150`，详见 experiments.md「最终主实验结论」）
 

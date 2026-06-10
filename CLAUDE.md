@@ -51,7 +51,9 @@ CUIT「基于深度学习的计算机视觉实践项目」课程作业，2026 �
 
 ⑥**结果整理与可视化全部完成**（3.5.1–3.5.4 + 2.2.7）：新增 `scripts/plot_curves.py`（五实验收敛曲线对比）、`plot_per_class_ap.py`（每类 AP 柱状图+CSV，复评 test mAP@0.5=0.7709 与登记一致；最弱类 ph5/w32/w13 均为小尺寸牌）、`find_failure_cases.py`（全 test 集 FN=1382/FP=2370，三类失败模式：极小目标漏检/类标志物误检/兜底与近似类混淆）、`draw_gt_samples.py`（2.2.7 标注抽查通过）；报告用图已入库 `docs/figures/`（曲线/柱状图/混淆矩阵/PR/10 张检测可视化/3 张失败案例）。
 
-**下一步**：`s_nomosaic`（增广消融 3.2.3，640+SGD+全程关 mosaic，2026-06-10 已挂后台 ~2h）出分后登记 experiments.md；推进《数据处理设计文档》（3.6）与需求分析报告等文档（期末占比最大）；（可选）`s_640_sgd` 延长至 150 轮做 v8 同条件公平对比。脚本变更：`train.py` 已加 `--optimizer`/`--mosaic` + 修复 resume 按头类型选类，`eval.py` 已按权重头类型自动选 YOLO/YOLOv10；**注意 ultralytics `predict(source=list)` 会把整个 list 当一个 batch（3067 张直接 OOM），批量推理要传目录或用 stream**。
+⑦**增广消融完成**（3.2.3，`s_nomosaic`）：640+SGD 下全程关 mosaic test **0.629** vs 对照 0.646 → mosaic 贡献 +0.017，三组单变量调参证据链（优化器/分辨率/增广）齐了。
+
+**下一步**：训练类实验已全部收尾，重心转《数据处理设计文档》（3.6）与需求分析报告等文档（期末占比最大）；（可选）`s_640_sgd` 延长至 150 轮做 v8 同条件公平对比。脚本变更：`train.py` 已加 `--optimizer`/`--mosaic` + 修复 resume 按头类型选类，`eval.py` 已按权重头类型自动选 YOLO/YOLOv10；**注意 ultralytics `predict(source=list)` 会把整个 list 当一个 batch（3067 张直接 OOM），批量推理要传目录或用 stream**。
 
 ## 给 Claude 的协作提示
 
