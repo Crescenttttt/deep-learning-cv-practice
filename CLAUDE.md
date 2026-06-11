@@ -53,7 +53,9 @@ CUIT「基于深度学习的计算机视觉实践项目」课程作业，2026 �
 
 ⑦**增广消融完成**（3.2.3，`s_nomosaic`）：640+SGD 下全程关 mosaic test **0.629** vs 对照 0.646 → mosaic 贡献 +0.017，三组单变量调参证据链（优化器/分辨率/增广）齐了。
 
-**下一步**：训练类实验已全部收尾，重心转《数据处理设计文档》（3.6）与需求分析报告等文档（期末占比最大）；（可选）`s_640_sgd` 延长至 150 轮做 v8 同条件公平对比。脚本变更：`train.py` 已加 `--optimizer`/`--mosaic` + 修复 resume 按头类型选类，`eval.py` 已按权重头类型自动选 YOLO/YOLOv10；**注意 ultralytics `predict(source=list)` 会把整个 list 当一个 batch（3067 张直接 OOM），批量推理要传目录或用 stream**。
+⑧**v8 公平对比补充完成**（`s_640_sgd_e150`，150 轮，含一次 e20 中断+resume 验证）：test **0.706**，val 0.728@e145 已饱和 → **同 640 下 v10-S 仍低于 v8-S 0.798，「加 epoch 追平」证伪**；剩余差距主要在召回（one2one 头小目标召回代价），v10 需 1280 才追平 mAP@.5:.95——复现结论修正为「精度可比（高分辨率下）+ 端到端延迟优势」，详见 experiments.md「公平对比补充」。
+
+**下一步**：训练类实验全部收尾（计划表仅剩可选的 YOLOv10-N 对照），重心转《数据处理设计文档》（3.6）与需求分析报告等文档（期末占比最大）。脚本变更：`train.py` 已加 `--optimizer`/`--mosaic` + 修复 resume 按头类型选类，`eval.py` 已按权重头类型自动选 YOLO/YOLOv10；**注意 ultralytics `predict(source=list)` 会把整个 list 当一个 batch（3067 张直接 OOM），批量推理要传目录或用 stream**。
 
 ## 给 Claude 的协作提示
 
