@@ -47,9 +47,15 @@ CUIT「基于深度学习的计算机视觉实践项目」课程作业，2026 �
 
 工作目录 `D:\Project\deep-learning-cv-practice`（Git 仓库已建立，main 分支）。
 
-**已完成**：仓库与根 README + 4 篇文献总结（`a39bf0d`）；选题已定（YOLOv10 + TT100K）；**环境搭通**（conda `yolov10`，Py3.9 + PyTorch2.0.1+cu118，RTX4070；官方仓库 `D:\Project\yolov10`；`docs/环境搭建.md`，任务 2.1）；**TT100K 数据准备完成**（`scripts/filter_tt100k.py`+`tt100k_to_yolo.py`，真实 2016 版实跑：182→45 类与论文一致，train/val/test=5493/610/3067，`check_det_dataset` 通过；`docs/数据下载与目录说明.md`，任务 2.2）；**训练/评测脚本交付**（`scripts/train.py`/`eval.py`/`predict_demo.py`+`experiments.md`，任务 2.3）；**YOLOv10-S baseline 已跑**（640/100轮，test **mAP@0.5=0.415**，任务 3.1）。**调参/对比/消融已推进**：①`imgsz=1280` → **0.592**（攻小目标，3.2.2）；②**优化器修复**：发现 baseline 低分是 `auto`(AdamW lr≈2e-4) 欠拟合，改 **显式 SGD lr=0.01** → 640 下 **0.646(+56%)**，且 val 曲线 100 轮仍未饱和（`s_640_sgd`，3.2.1）；③**横向对比** YOLOv8-S=**0.798**（同 640，揭示 v10 欠拟合，3.3.1）；④**NMS-free 消融**（`scripts/ablation_nms.py`）：无NMS vs 带NMS 精度近无损、后处理省~85%(~7×)，复现论文 Table 3（3.4.1）。原始数据在仓库外 `D:\Project\data`。
+**已完成**：仓库与根 README + 4 篇文献总结（`a39bf0d`）；选题已定（YOLOv10 + TT100K）；**环境搭通**（conda `yolov10`，Py3.9 + PyTorch2.0.1+cu118，RTX4070；官方仓库 `D:\Project\yolov10`；`docs/环境搭建.md`，任务 2.1）；**TT100K 数据准备完成**（`scripts/filter_tt100k.py`+`tt100k_to_yolo.py`，真实 2016 版实跑：182→45 类与论文一致，train/val/test=5493/610/3067，`check_det_dataset` 通过；`docs/数据下载与目录说明.md`，任务 2.2）；**训练/评测脚本交付**（`scripts/train.py`/`eval.py`/`predict_demo.py`+`experiments.md`，任务 2.3）；**YOLOv10-S baseline 已跑**（640/100轮，test **mAP@0.5=0.415**，任务 3.1）。**调参/对比/消融已推进**：①`imgsz=1280` → **0.592**（攻小目标，3.2.2）；②**优化器修复**：发现 baseline 低分是 `auto`(AdamW lr≈2e-4) 欠拟合，改 **显式 SGD lr=0.01** → 640 下 **0.646(+56%)**，且 val 曲线 100 轮仍未饱和（`s_640_sgd`，3.2.1）；③**横向对比** YOLOv8-S=**0.798**（同 640，揭示 v10 欠拟合，3.3.1）；④**NMS-free 消融**（`scripts/ablation_nms.py`）：无NMS vs 带NMS 精度近无损、后处理省~85%(~7×)，复现论文 Table 3（3.4.1）；⑤**最终主实验**（`s_1280_sgd_e150`，1280+SGD lr=0.01+150轮）：test **mAP@0.5=0.771 / mAP@.5:.95=0.601**，比 baseline **+86%**，越过及格线 0.70，mAP@.5:.95 基本追平 v8（0.610）；val 峰值 0.784@e40 即饱和（高分辨率收敛快）。原始数据在仓库外 `D:\Project\data`。
 
-**下一步**：跑**最终主实验**——`1280 + 显式 SGD lr=0.01 + 150~200 轮`（叠加「攻小目标」+「修欠拟合」两个已验证杠杆，目标 0.8+）；抽样可视化（2.2.7/3.5.2）；失败案例分析（3.5.4）；推进需求分析报告等文档（期末占比最大）。脚本变更：`train.py` 已加 `--optimizer`，`eval.py` 已按权重头类型自动选 YOLO/YOLOv10（否则 v8 评测会错）。
+⑥**结果整理与可视化全部完成**（3.5.1–3.5.4 + 2.2.7）：新增 `scripts/plot_curves.py`（五实验收敛曲线对比）、`plot_per_class_ap.py`（每类 AP 柱状图+CSV，复评 test mAP@0.5=0.7709 与登记一致；最弱类 ph5/w32/w13 均为小尺寸牌）、`find_failure_cases.py`（全 test 集 FN=1382/FP=2370，三类失败模式：极小目标漏检/类标志物误检/兜底与近似类混淆）、`draw_gt_samples.py`（2.2.7 标注抽查通过）；报告用图已入库 `docs/figures/`（曲线/柱状图/混淆矩阵/PR/10 张检测可视化/3 张失败案例）。
+
+⑦**增广消融完成**（3.2.3，`s_nomosaic`）：640+SGD 下全程关 mosaic test **0.629** vs 对照 0.646 → mosaic 贡献 +0.017，三组单变量调参证据链（优化器/分辨率/增广）齐了。
+
+⑧**v8 公平对比补充完成**（`s_640_sgd_e150`，150 轮，含一次 e20 中断+resume 验证）：test **0.706**，val 0.728@e145 已饱和 → **同 640 下 v10-S 仍低于 v8-S 0.798，「加 epoch 追平」证伪**；剩余差距主要在召回（one2one 头小目标召回代价），v10 需 1280 才追平 mAP@.5:.95——复现结论修正为「精度可比（高分辨率下）+ 端到端延迟优势」，详见 experiments.md「公平对比补充」。
+
+**下一步**：训练类实验全部收尾（计划表仅剩可选的 YOLOv10-N 对照），重心转《数据处理设计文档》（3.6）与需求分析报告等文档（期末占比最大）。脚本变更：`train.py` 已加 `--optimizer`/`--mosaic` + 修复 resume 按头类型选类，`eval.py` 已按权重头类型自动选 YOLO/YOLOv10；**注意 ultralytics `predict(source=list)` 会把整个 list 当一个 batch（3067 张直接 OOM），批量推理要传目录或用 stream**。
 
 ## 给 Claude 的协作提示
 

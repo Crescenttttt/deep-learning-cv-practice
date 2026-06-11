@@ -103,7 +103,7 @@
 - [x] **2.2.4** **格式转换**：`scripts/tt100k_to_yolo.py` 已写——TT100K JSON → YOLO `.txt`（`class_id cx cy w h`，按各图实际尺寸归一化）。已验证非正方形图 W/H 分别归一化正确。
 - [x] **2.2.5** **数据划分**：同上脚本完成——沿用官方 train/test（按 path 前缀），再从 train 切出 val（`--val-ratio` 默认 0.1）；采用 `images/{train,val,test}` + `labels/{...}` 标准目录结构（非 list 文件，等价且更通用），图像默认硬链接零拷贝。
 - [x] **2.2.6** 生成 Ultralytics 风格 `tt100k.yaml`（`path` / `train` / `val` / `test` / `names`）——同上脚本自动产出，已验证。
-- [ ] **2.2.7** 抽样可视化：随机 20 张训练图叠加 bbox，肉眼验证标注无误
+- [x] **2.2.7** 抽样可视化：`scripts/draw_gt_samples.py` 随机 20 张训练图叠加 GT bbox（`runs/analysis/gt_samples/`），肉眼验证标注对齐无误（含 6 框龙门架限速牌图，验证多目标与小目标标注）
 
 > **脚本状态**：2.2.3-2.2.6 已在**真实 TT100K（2016 版）实跑通过**：
 > - 统计：16811 图 / 182 类 / 26349 实例 → 阈值 100 筛出 **45 类**（保留 90.8% 实例），**与论文标准 45 类完全一致**；
@@ -150,7 +150,7 @@
 - [x] **3.1.1** 主实验已跑：YOLOv10-S + COCO 预训练，imgsz=640，batch=16，100 轮 → `runs/detect/s_base_640/`
 - [x] **3.1.2** 监控：loss/mAP/lr 曲线已出（`results.png`、`confusion_matrix.png`、`PR_curve.png` 等）
 - [x] **3.1.3** test 集报告：**mAP@0.5=0.415，mAP@0.5:0.95=0.302**，mP 0.427 / mR 0.445，4.2ms/图（见 `experiments.md`）
-- [x] **3.1.4** 验收：**未达及格线 0.70 → 进入调参**（小目标瓶颈，下一步 imgsz=1280，见 3.2）
+- [x] **3.1.4** 验收：baseline 未达 0.70 → 调参；**最终主实验 `s_1280_sgd_e150`（1280+SGD+150轮）test mAP@0.5=0.771，越过及格线 0.70**（见 3.2 最终结论）
 
 ### 3.2 调参实验（B 主责，A 提供理论判断）
 
@@ -158,12 +158,13 @@
 
 - [x] **3.2.1** 优化器/学习率：`optimizer=auto`(AdamW lr≈2e-4) vs **显式 SGD lr=0.01** 已验证 → 640 下 test mAP@0.5 **0.415→0.646(+56%)**，定位 baseline 低分根因是欠拟合（`s_640_sgd`）
 - [x] **3.2.2** 输入分辨率：640 vs **1280** 已验证 → test mAP@0.5 **0.415→0.592（+43%）**，证实高分辨率对 TT100K 小目标显著有效（`s_imgsz1280`）
-- [ ] **3.2.3** 数据增广：默认 mosaic+mixup vs 关闭 mosaic 最后 10 epoch（论文常见做法）
-- [ ] **3.2.4** 每组实验填入 `experiments.md` 对比表（实验名 / 配置 / mAP / 备注）
+- [x] **3.2.3** 数据增广消融：默认 mosaic（末 10 轮关）vs **全程关 mosaic** 已验证 → 640+SGD 下 test mAP@0.5 **0.646 vs 0.629（mosaic 贡献 +0.017）**，证明 mosaic 对小目标数据正贡献（`s_nomosaic`，详见 experiments.md「增广消融」）
+- [x] **3.2.4** 每组实验填入 `experiments.md` 对比表（实验名 / 配置 / mAP / 备注）
+- [x] **最终主实验**：叠加 1280+SGD+150轮 → test **mAP@0.5=0.771 / mAP@.5:.95=0.601**，比 baseline +86%，mAP@.5:.95 基本追平 v8（0.610）（`s_1280_sgd_e150`，详见 experiments.md「最终主实验结论」）
 
 ### 3.3 横向对比（B + A）
 
-- [x] **3.3.1** **YOLOv10-S vs YOLOv8-S**：同数据/同 640/同 100 轮 → v8s **0.798** vs v10s baseline 0.415；揭示 v10 在 auto 超参下欠拟合（`v8s_base_640`，详见 experiments.md「优化器发现」）
+- [x] **3.3.1** **YOLOv10-S vs YOLOv8-S**：同数据/同 640/同 100 轮 → v8s **0.798** vs v10s baseline 0.415；揭示 v10 在 auto 超参下欠拟合（`v8s_base_640`，详见 experiments.md「优化器发现」）。**公平对比补充**：v10s 640+SGD 150 轮饱和于 **0.706** 仍低于 v8——剩余差距在 one2one 头小目标召回，1280 下才追平 mAP@.5:.95（`s_640_sgd_e150`，详见「公平对比补充」）
 - [ ] **3.3.2** **YOLOv10-S vs RT-DETR-R18**（可选，时间紧可省）
 - [ ] **3.3.3** 输出对比表（参考论文 Table 1 样式）
 
@@ -176,10 +177,10 @@
 
 ### 3.5 结果整理与可视化（C 主责）
 
-- [ ] **3.5.1** 训练曲线图（loss / mAP，导出 PNG）
-- [ ] **3.5.2** 测试集随机 10 张图的检测可视化（**含一张小目标 hard case**）
-- [ ] **3.5.3** 混淆矩阵 / PR 曲线 / 每类 AP 柱状图
-- [ ] **3.5.4** 失败案例分析：找 2–3 张漏检 / 误检图，文字分析原因（一般是小目标、稀有类、光照）
+- [x] **3.5.1** 训练曲线图：`scripts/plot_curves.py` 五实验 val mAP@0.5 收敛对比 → `docs/figures/training_curves.png`（直观呈现 auto 欠拟合 vs SGD、640 vs 1280）
+- [x] **3.5.2** 测试集随机 10 张检测可视化：`predict_demo.py --imgsz 1280`（seed=0）→ `docs/figures/predict_demo/`×10（2048²→1024 降采样）；小目标 hard case 见 `docs/figures/failure_cases/rank02`（收费站远景 8 个 pl20 漏检）
+- [x] **3.5.3** 混淆矩阵 / PR 曲线 / 每类 AP 柱状图：`scripts/plot_per_class_ap.py`（test@1280 复评 mAP@0.5=0.7709 与登记一致）→ `docs/figures/per_class_ap_s1280.{png,csv}` + `confusion_matrix_s1280.png` + `PR_curve_s1280.png`；最弱类 ph5/w32/w13/p6/ph4（均为小尺寸限高/警告牌）
+- [x] **3.5.4** 失败案例分析：`scripts/find_failure_cases.py` 全 test 集 FN=1382/FP=2370，top12 最差图 + summary.csv；三类失败模式（极小目标漏检 / 类标志物误检 / 兜底类与限速近似类混淆）+ 标注不完备注意点，详见 experiments.md「失败案例分析」，代表图 `docs/figures/failure_cases/`×3
 
 ### 3.6 文档撰写（C 主责）
 

@@ -59,7 +59,10 @@ def main() -> int:
     p.add_argument("--optimizer", default="auto",
                    help="优化器：auto/SGD/AdamW（auto 会用 AdamW 并覆盖 lr0≈2e-4，"
                         "要让 --lr0 生效需显式指定 SGD，见 experiments.md baseline 发现）")
+    p.add_argument("--mosaic", type=float, default=1.0, help="mosaic 增广概率，0 为全程关闭（增广消融 3.2.3）")
     p.add_argument("--close-mosaic", type=int, default=10, help="最后 N 轮关闭 mosaic（论文常见做法，3.2.3）")
+    p.add_argument("--mixup", type=float, default=0.0, help="mixup 增广概率（抗过拟合，3.2.3）")
+    p.add_argument("--copy-paste", type=float, default=0.0, help="copy-paste 增广概率（利好小目标/类别不平衡，3.2.3）")
     p.add_argument("--device", default="0", help="GPU 编号，或 'cpu'")
     p.add_argument("--workers", type=int, default=8, help="DataLoader worker 数（Windows 高分辨率易崩，调小如 4/2）")
     p.add_argument("--resume", action="store_true", help="从上次中断处续训")
@@ -73,7 +76,10 @@ def main() -> int:
         batch=args.batch,
         lr0=args.lr0,
         optimizer=args.optimizer,
+        mosaic=args.mosaic,
         close_mosaic=args.close_mosaic,
+        mixup=args.mixup,
+        copy_paste=args.copy_paste,
         device=args.device,
         workers=args.workers,
         project="runs/detect",  # 固定输出到本仓库内（否则会落到 ultralytics 全局 runs_dir）
