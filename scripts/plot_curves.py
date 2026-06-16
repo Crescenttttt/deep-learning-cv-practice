@@ -17,7 +17,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-DEFAULT_RUNS = ["s_base_640", "s_640_sgd", "s_imgsz1280", "s_1280_sgd_e150", "v8s_base_640"]
+DEFAULT_RUNS = ["s_base_640", "s_640_sgd", "s_imgsz1280", "s_1280_sgd_e150_clean", "v8s_base_640"]
 
 
 def read_map50(results_csv: Path):
