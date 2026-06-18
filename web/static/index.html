@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traffic Sign Detection — YOLOv10 + TT100K</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<!-- ================================================================
+     HEADER
+     ================================================================ -->
+<header class="site-header">
+  <div class="header-inner">
+    <span class="logo-wordmark">Detection Lab</span>
+    <nav class="header-nav">
+      <span class="nav-status" id="modelStatus">● Model Ready</span>
+    </nav>
+  </div>
+</header>
+
+<main class="page-main">
+
+  <!-- Hero -->
+  <section class="hero">
+    <p class="hero-label">YOLOv10-S &nbsp;·&nbsp; TT100K &nbsp;·&nbsp; 45 Classes</p>
+    <h1>Traffic Sign<br>Detection</h1>
+    <p class="hero-desc">Autonomous driving perception — real-time Chinese traffic sign recognition
+       on the TT100K benchmark. Upload an image, use your camera, or process video &amp; batches.</p>
+  </section>
+
+  <!-- Tab bar -->
+  <nav class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-tab="detect">Detect</button>
+    <button class="tab-btn" data-tab="camera">Camera</button>
+    <button class="tab-btn" data-tab="batch">Batch</button>
+    <button class="tab-btn" data-tab="video">Video</button>
+    <button class="tab-btn" data-tab="info">Model Info</button>
+  </nav>
+
+  <!-- ================================================================
+       TAB: Detect
+       ================================================================ -->
+  <section class="tab-panel active" id="panel-detect">
+    <div class="detect-grid">
+      <!-- Left: upload + controls -->
+      <div class="detect-input">
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept="image/*" hidden>
+          <p class="upload-prompt" id="uploadPrompt">Drop image here<br><span>or click to browse</span></p>
+          <img class="upload-preview" id="uploadPreview" alt="Preview">
+        </div>
+        <div class="controls-row">
+          <div class="control-group">
+            <label for="confSlider">Confidence</label>
+            <div class="slider-with-val">
+              <input type="range" id="confSlider" min="0.1" max="0.9" step="0.05" value="0.25">
+              <span class="slider-val" id="confVal">0.25</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label for="imgszSelect">Resolution</label>
+            <select id="imgszSelect">
+              <option value="640">640</option>
+              <option value="1280" selected>1280</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" id="detectBtn" disabled>Run Detection</button>
+      </div>
+
+      <!-- Right: results -->
+      <div class="detect-output" id="detectOutput">
+        <div class="output-placeholder">
+          <p>Detection results will appear here</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       TAB: Camera
+       ================================================================ -->
+  <section class="tab-panel" id="panel-camera">
+    <div class="camera-stage">
+      <div class="camera-viewfinder" id="cameraViewfinder">
+        <video id="cameraVideo" autoplay playsinline muted hidden></video>
+        <canvas id="cameraCanvas"></canvas>
+        <div class="camera-off" id="cameraOff">
+          <p>Camera offline</p>
+          <span>Click "Start Camera" to begin</span>
+        </div>
+        <div class="camera-hud" id="cameraHud">
+          <span class="hud-item" id="hudFps">-- FPS</span>
+          <span class="hud-item hud-count" id="hudCount">0 objects</span>
+          <span class="hud-item hud-latency" id="hudLatency"></span>
+        </div>
+      </div>
+      <div class="camera-actions">
+        <button class="btn-primary" id="cameraStartBtn">Start Camera</button>
+        <div class="controls-row">
+          <div class="control-group">
+            <label for="cameraConf">Confidence</label>
+            <div class="slider-with-val">
+              <input type="range" id="cameraConf" min="0.1" max="0.9" step="0.05" value="0.25">
+              <span class="slider-val" id="cameraConfVal">0.25</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label for="cameraImgsz">Resolution</label>
+            <select id="cameraImgsz">
+              <option value="640" selected>640</option>
+              <option value="1280">1280</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="tab-panel" id="panel-batch">
+    <div class="batch-layout">
+      <div class="batch-input">
+        <div class="upload-zone" id="batchUploadZone">
+          <input type="file" id="batchFileInput" accept="image/*" multiple hidden>
+          <p class="upload-prompt" id="batchUploadPrompt">Drop images here<br><span>or click to browse</span></p>
+          <div class="batch-previews" id="batchPreviews"></div>
+        </div>
+        <div class="controls-row">
+          <div class="control-group">
+            <label for="batchConf">Confidence</label>
+            <div class="slider-with-val">
+              <input type="range" id="batchConf" min="0.1" max="0.9" step="0.05" value="0.25">
+              <span class="slider-val" id="batchConfVal">0.25</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label for="batchImgsz">Resolution</label>
+            <select id="batchImgsz">
+              <option value="640">640</option>
+              <option value="1280" selected>1280</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" id="batchDetectBtn" disabled>Run Batch Detection</button>
+      </div>
+      <div class="batch-output" id="batchOutput">
+        <div class="output-placeholder"><p>Batch results will appear here</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       TAB: Video
+       ================================================================ -->
+  <section class="tab-panel" id="panel-video">
+    <div class="video-layout">
+      <div class="video-input">
+        <div class="upload-zone" id="videoUploadZone">
+          <input type="file" id="videoFileInput" accept="video/*" hidden>
+          <p class="upload-prompt" id="videoUploadPrompt">Drop video here<br><span>or click to browse</span></p>
+          <video class="upload-preview" id="videoPreview" controls hidden></video>
+        </div>
+        <div class="controls-row">
+          <div class="control-group">
+            <label for="videoConf">Confidence</label>
+            <div class="slider-with-val">
+              <input type="range" id="videoConf" min="0.1" max="0.9" step="0.05" value="0.25">
+              <span class="slider-val" id="videoConfVal">0.25</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label for="videoImgsz">Resolution</label>
+            <select id="videoImgsz">
+              <option value="640">640</option>
+              <option value="1280" selected>1280</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" id="videoDetectBtn" disabled>Run Video Detection</button>
+      </div>
+      <div class="video-output" id="videoOutput">
+        <div class="output-placeholder"><p>Video result will appear here</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       TAB: Info
+       ================================================================ -->
+  <section class="tab-panel" id="panel-info">
+    <div class="info-card" id="infoCard">
+      <div class="output-placeholder"><p>Loading model information…</p></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-rule"></div>
+  <p>YOLOv10-S &nbsp;·&nbsp; TT100K &nbsp;·&nbsp; Smart Driving Perception</p>
+</footer>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-bar"></div>
+</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

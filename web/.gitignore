@@ -1,0 +1,3 @@
+static/results/
+*.pt
+__pycache__/
